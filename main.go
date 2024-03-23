@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"runtime/pprof"
 	"strconv"
 	"strings"
 )
@@ -17,7 +18,26 @@ type CityData struct {
 
 const filename = "measurements-1b.txt"
 
+func setupProfiler() func() {
+	f, err := os.Create("cpu_profile.prof")
+	if err != nil {
+		panic(err)
+	}
+
+	if err := pprof.StartCPUProfile(f); err != nil {
+		panic(err)
+	}
+
+	return func() {
+		pprof.StopCPUProfile()
+		f.Close()
+	}
+}
+
 func main() {
+	cleanupProfiler := setupProfiler()
+	defer cleanupProfiler()
+
 	fmt.Println("Let's process a billion rows!")
 
 	cities := map[string]CityData{}
