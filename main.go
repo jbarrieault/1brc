@@ -4,8 +4,10 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"runtime/pprof"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -48,10 +50,10 @@ func main() {
 
 	fmt.Println("\nLet's process a billion rows!\n")
 
-	brc(*filename)
+	process(*filename, os.Stdout)
 }
 
-func brc(filename string) {
+func process(filename string, w io.Writer) {
 	cities := map[string]CityData{}
 
 	file, err := os.Open(filename)
@@ -92,8 +94,16 @@ func brc(filename string) {
 		}
 	}
 
-	for city, data := range cities {
+	keys := make([]string, 0, len(cities))
+	for k := range cities {
+		keys = append(keys, string(k))
+	}
+
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		data := cities[k]
 		mean := data.sum / float64(data.count)
-		fmt.Printf("%s=%.1f/%.1f/%.1f\n", city, data.min, mean, data.max)
+		fmt.Fprintf(w, "%s=%.1f/%.1f/%.1f\n", k, data.min, mean, data.max)
 	}
 }
