@@ -48,12 +48,12 @@ func main() {
 	fmt.Println("CPU profiling enabled: ", *profile)
 	fmt.Println("Mesurements file:", *filename)
 
-	fmt.Println("\nLet's process a billion rows!\n")
+	fmt.Println("\nLet's process a billion rows!")
 
-	process(*filename, os.Stdout)
+	processMeasurements(*filename, os.Stdout)
 }
 
-func process(filename string, w io.Writer) {
+func processMeasurements(filename string, w io.Writer) {
 	cities := map[string]CityData{}
 
 	file, err := os.Open(filename)
