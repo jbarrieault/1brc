@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"os"
 	"runtime/pprof"
@@ -15,8 +16,6 @@ type CityData struct {
 	sum   float64
 	count int
 }
-
-const filename = "measurements-1b.txt"
 
 func setupProfiler() func() {
 	f, err := os.Create("cpu_profile.prof")
@@ -35,14 +34,30 @@ func setupProfiler() func() {
 }
 
 func main() {
-	cleanupProfiler := setupProfiler()
-	defer cleanupProfiler()
+	profile := flag.Bool("profile", false, "enable CPU profiler")
+	filename := flag.String("filename", "", "measurements filename")
+	flag.Parse()
 
-	fmt.Println("Let's process a billion rows!")
+	if *profile {
+		cleanupProfiler := setupProfiler()
+		defer cleanupProfiler()
+	}
 
+	fmt.Println("CPU profiling enabled: ", *profile)
+	fmt.Println("Mesurements file:", *filename)
+
+	fmt.Println("\nLet's process a billion rows!\n")
+
+	brc(*filename)
+}
+
+func brc(filename string) {
 	cities := map[string]CityData{}
 
-	file, _ := os.Open(filename)
+	file, err := os.Open(filename)
+	if err != nil {
+		panic(err)
+	}
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
